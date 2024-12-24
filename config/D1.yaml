@@ -1,0 +1,114 @@
+# 数据集名称，表示当前使用的数据集是 D1
+dataset: dataset_name_D1
+
+# 数据集文件路径配置
+path:
+    # 存储案例数据的CSV文件路径，用于保存和读取案例信息
+    case_path: ../../dataset/processed/aiops-dataset-ART-relevant/D1/cases/cases.csv
+    # 存储异常检测案例的pickle文件路径，包含经过预处理的异常检测数据
+    ad_case_path: ../../dataset/processed/aiops-dataset-ART-relevant/D1/cases/ad_cases.pkl
+    # 哈希信息存储目录路径，用于保存哈希值相关文件以快速索引数据
+    hash_dir: ../../dataset/processed/aiops-dataset-ART-relevant/D1/hash_info/
+    # 样本数据存储目录路径，用于保存样本切片数据
+    sample_dir: ../../dataset/processed/aiops-dataset-ART-relevant/D1/samples/
+
+# 特征维度配置
+feat_dim:
+    # 测量数据的特征维度（如时间序列中度量的数量）
+    metric: 110
+    # 跟踪数据的特征维度
+    trace: 9
+    # 日志数据的特征维度
+    log: 11
+
+# 训练样本的数量。如果选择 'whole'，则表示使用所有可用样本进行训练，如果不是需要配置 train_samples_num 指定训练集大小
+train_samples_num: whole
+
+# 模型参数配置
+model_param:
+    # 实例特征的维度，即每个实例的输入特征数量（比如图中的节点数量或特征维度）
+    instance_dim: 46
+    # Transformer模型中自注意力机制的头数（多头注意力）
+    num_heads: 2
+    # Transformer编码器层数
+    tf_layers: 1
+    # 通道特征的维度（每个时间步的特征维度）,数量为特征维度配置 feat 求和
+    channel_dim: 130
+    # GraphSAGE模型中图卷积层的隐藏层维度
+    gnn_hidden_dim: 94
+    # GraphSAGE模型输出特征的维度
+    gnn_out_dim: 32
+    # 噪声比率，用于在训练时随机丢弃部分输入（Dropout）
+    noise_rate: 0.3
+
+    # 图神经网络（GraphSAGE）的层数
+    gnn_layers: 4
+
+    # GRU网络的隐藏层维度
+    gru_hidden_dim: 32
+    # GRU层的数量
+    gru_layers: 2
+    # 模型训练的轮数（迭代次数）
+    epochs: 1000
+    # 每个批次的样本数量
+    batch_size: 64
+    # 学习率，用于优化算法
+    learning_rate: 0.001
+
+    # 学习窗口
+    learning_win_size: 6
+    # 窗口内最大间隔
+    learning_max_gap: 90
+# 下游任务参数（如异常检测、故障预测等）
+downstream_param:
+    # 异常检测（Anomaly Detection）的参数配置
+    AD:
+        # 训练集和测试集的划分比例，0.6表示训练集占60%
+        split_ratio: 0.6
+        # 异常检测方法，'num'表示基于数量的检测方法， 还有选择是'prob'
+        method: 'num'
+        # t_value 是阈值，控制实例偏差到系统偏差转换时的转换力度，例如前 t_value 大偏差的实例偏差用于计算系统偏差
+        t_value: 3
+
+        # 检测阈值的置信度，该值越小则输出异常越少但是越可信；该值越大则输出异常越多但越不可信
+        q: 0.1
+        # 置信度水平，设定前95%的数据为正常值，越高则异常检测更敏感
+        level: 0.95
+        # 延迟时间，模型在故障预测时会预测很多异常点，只有异常点间隔 < delay 的异常点被认为是出于一个异常窗口（异常时间段）
+        delay: 600
+        # 注入故障真实时间为 T，真实的异常窗口时间为 [T - impact_window, T + impact_window]
+        impact_window: 300
+
+        verbose: True
+
+    FT:
+        # 故障预测（Fault Prediction）的参数配置
+        split_ratio: 0.6
+        # 训练集和测试集的划分比例
+        method: 'num'
+        # 故障预测方法，'num'表示基于数量的预测方法
+        t_value: 3
+        # 用于故障预测的阈值
+        before: 59
+        # 故障发生前的时间窗口
+        after: 300
+        # 故障发生后的时间窗口
+        max_clusters: 25
+        # 故障数据聚类的最大数量
+        verbose: True
+        # 是否打印详细的日志信息
+
+    RCL:
+        # 重构学习（Reconstruction Learning）的参数配置
+        split_ratio: 0.6
+        # 训练集和测试集的划分比例
+        method: 'num'
+        # 重构学习方法，'num'表示基于数量的方法
+        t_value: 3
+        # 用于重构学习的阈值
+        before: 59
+        # 重构学习前的时间窗口
+        after: 300
+        # 重构学习后的时间窗口
+        verbose: True
+        # 是否打印详细的日志信息
